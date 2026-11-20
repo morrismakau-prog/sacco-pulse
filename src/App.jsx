@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
+    <div className="min-h-screen bg-zinc-900">
     <Router>
       <Navbar />
       
@@ -17,6 +18,7 @@ function App() {
         <Route path="/Dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
+    </div>
   );
 }
 
