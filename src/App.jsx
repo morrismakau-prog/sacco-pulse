@@ -1,10 +1,22 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Report from './pages/Report';
+import Dashboard from './pages/Dashboard';
+
 function App() {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <h1 className="text-4xl font-bold text-red-600 bg-white p-8 rounded-lg shadow-lg">
-        Tailwind is working!
-      </h1>
-    </div>
+    <Router>
+      <Navbar />
+      
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Report" element={<Report />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
