@@ -137,6 +137,13 @@ const Home = () => {
               <p className="text-gray-400 text-sm mt-4 flex items-center gap-1">
                 <FaMapMarkerAlt className="text-red-500" /> {review.locationName}
               </p>
+        
+              {review.saccoReply && (
+                <div className="mt-3 bg-gray-900 p-3 rounded-md border-l-2 border-red-500">
+                  <p className="text-xs text-red-400 font-bold mb-1">SACCO Reply:</p>
+                  <p className="text-sm text-gray-300">{review.saccoReply}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>

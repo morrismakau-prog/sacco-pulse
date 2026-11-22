@@ -7,7 +7,7 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { auth, googleProvider, db } from '../firebase/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -21,10 +21,9 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
 
-    
     await setDoc(doc(db, "users", newUser.uid), {
       email: email,
-      role: role,
+      role: role, 
       saccoName: saccoName || null
     });
 
@@ -44,8 +43,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setUser({ 
+            ...currentUser, 
+            role: docSnap.data().role, 
+            saccoName: docSnap.data().saccoName 
+          });
+        } else {
+          setUser({ ...currentUser, role: 'passenger', saccoName: null });
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
