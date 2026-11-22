@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC_ZXz8A1rNCmmj2nugD9MRG1wAwiUJFTY",
-  authDomain: "sacco-pulse.firebaseapp.com",
-  projectId: "sacco-pulse",
-  storageBucket: "sacco-pulse.firebasestorage.app",
-  messagingSenderId: "423503826205",
-  appId: "1:423503826205:web:56146120bcc2199f1525f4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
