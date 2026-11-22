@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../firebase/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { FaStar, FaRegStar, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Home = () => {
   const { user } = useAuth();
@@ -8,6 +11,28 @@ const Home = () => {
   const [locationResults, setLocationResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState('');
+
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "reviews"));
+        const reviewsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setReviews(reviewsData);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -21,7 +46,6 @@ const Home = () => {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&countrycodes=ke&limit=5`
       );
-      
       const data = await response.json();
       
       if (data.length === 0) {
@@ -35,6 +59,18 @@ const Home = () => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, index) => (
+      <span key={index} className="mr-1">
+        {index < rating ? (
+          <FaStar className="inline text-yellow-500 text-xl" />
+        ) : (
+          <FaRegStar className="inline text-gray-500 text-xl" />
+        )}
+      </span>
+    ));
   };
 
   return (
@@ -75,26 +111,36 @@ const Home = () => {
           </h3>
           <ul>
             {locationResults.map((location) => (
-              <li key={location.place_id} className="px-6 py-3 border-b border-gray-700 last:border-0 hover:bg-gray-700 cursor-pointer text-gray-200">
-                 {location.display_name}
+              <li key={location.place_id} className="px-6 py-3 border-b border-gray-700 last:border-0 hover:bg-gray-700 cursor-pointer text-gray-200 flex items-center gap-2">
+                <FaMapMarkerAlt className="text-red-500" /> {location.display_name}
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-red-600">
-          <h2 className="text-xl font-bold text-white">Super Metro</h2>
-          <p className="text-yellow-500 text-lg">⭐⭐⭐⭐⭐</p>
-          <p className="text-gray-300 mt-2">"Great service, very clean buses."</p>
+      <h2 className="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-2">Recent Reviews</h2>
+      
+      {loadingReviews ? (
+        <p className="text-gray-400">Loading reviews...</p>
+      ) : reviews.length === 0 ? (
+        <p className="text-gray-400">No reviews yet. Be the first to write one!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-red-600">
+              <h3 className="text-xl font-bold text-white">{review.saccoName}</h3>
+              <div className="my-2">
+                {renderStars(review.rating)}
+              </div>
+              <p className="text-gray-300 mt-2">"{review.reviewText}"</p>
+              <p className="text-gray-400 text-sm mt-4 flex items-center gap-1">
+                <FaMapMarkerAlt className="text-red-500" /> {review.locationName}
+              </p>
+            </div>
+          ))}
         </div>
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-red-600">
-          <h2 className="text-xl font-bold text-white">Embassava</h2>
-          <p className="text-yellow-500 text-lg">⭐⭐⭐</p>
-          <p className="text-gray-300 mt-2">"Buses are fast but overcharge during rush hour."</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
